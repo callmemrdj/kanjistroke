@@ -1,0 +1,1553 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#c0392b" />
+    <title>Aplikasi Kanji MrDJ</title>
+    <style>
+      /* ===== Tema ===== */
+      :root {
+        --bg: #faf8f5;
+        --card: #fff;
+        --tx: #1f1d1a;
+        --mut: #7a746b;
+        --bd: #e6e0d6;
+        --ac: #c0392b;
+        --chip: #f3ece1;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #171614;
+          --card: #222120;
+          --tx: #f0ece6;
+          --mut: #a39c91;
+          --bd: #37352f;
+          --ac: #ef6c5d;
+          --chip: #2e2c28;
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme='dark'] {
+        --bg: #171614;
+        --card: #222120;
+        --tx: #f0ece6;
+        --mut: #a39c91;
+        --bd: #37352f;
+        --ac: #ef6c5d;
+        --chip: #2e2c28;
+        color-scheme: dark;
+      }
+
+      /* ===== Dasar ===== */
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      html {
+        scroll-padding-top: 150px;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--tx);
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          'Noto Sans JP',
+          'Noto Sans',
+          sans-serif;
+        line-height: 1.5;
+        touch-action: manipulation;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+      }
+      button:focus-visible,
+      input:focus-visible {
+        outline: 2px solid var(--ac);
+        outline-offset: 2px;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0;
+      }
+      h2 {
+        font-size: 19px;
+        margin: 6px 0 12px;
+      }
+      h3 {
+        font-size: 16px;
+        margin: 22px 0 8px;
+      }
+      .wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 16px max(12px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+      }
+      .note,
+      .empty {
+        color: var(--mut);
+        font-size: 14px;
+        margin: 0 0 12px;
+      }
+      .foot {
+        color: var(--mut);
+        font-size: 11px;
+        margin-top: 28px;
+        text-align: center;
+      }
+
+      /* ===== Header ===== */
+      .hd {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--bg);
+        border-bottom: 1px solid var(--bd);
+        padding: calc(env(safe-area-inset-top, 0px) + 10px) max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px));
+      }
+      .hd-in {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      .top {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .cnt {
+        color: var(--mut);
+        font-size: 12px;
+      }
+      #q {
+        width: 100%;
+        height: 44px;
+        padding: 0 14px;
+        border: 1px solid var(--bd);
+        border-radius: 12px;
+        background: var(--card);
+        color: var(--tx);
+        font-size: 16px;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .chips {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 8px 0 2px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      .chips::-webkit-scrollbar {
+        display: none;
+      }
+      .chip {
+        flex: none;
+        min-height: 40px;
+        padding: 0 16px;
+        border-radius: 99px;
+        border: 1px solid var(--bd);
+        background: var(--card);
+      }
+      .chip.on {
+        background: var(--ac);
+        border-color: var(--ac);
+        color: #fff;
+      }
+      .chip.sm {
+        min-height: 34px;
+        padding: 0 14px;
+        font-size: 14px;
+      }
+
+      body[data-lang='id'] .m-en,
+      body[data-lang='en'] .m-id {
+        display: none;
+      }
+      .chip.xs {
+        min-height: 30px;
+        padding: 0 10px;
+        font-size: 12px;
+      }
+      .tools {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .lang {
+        display: flex;
+        gap: 4px;
+      }
+      .trs {
+        color: var(--mut);
+        font-size: 12px;
+        margin: 4px 0 0;
+      }
+      .trs:empty {
+        display: none;
+      }
+
+      /* ===== Daftar & ubin ===== */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+        gap: 8px;
+      }
+      .tile {
+        background: var(--card);
+        border: 1px solid var(--bd);
+        border-radius: 12px;
+        padding: 8px 2px;
+        text-align: center;
+        min-height: 76px;
+        overflow: hidden;
+      }
+      .tile:hover,
+      .tile:active {
+        border-color: var(--ac);
+      }
+      .tile b {
+        display: block;
+        font-size: 32px;
+        font-weight: 500;
+        line-height: 1.2;
+      }
+      .tile span {
+        display: block;
+        font-size: 11px;
+        color: var(--mut);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 4px;
+      }
+      .more {
+        display: block;
+        width: 100%;
+        margin-top: 14px;
+        min-height: 46px;
+        border-radius: 12px;
+        border: 1px solid var(--bd);
+        background: var(--card);
+      }
+      .lnk,
+      .back,
+      .nav button {
+        background: none;
+        border: 0;
+        color: var(--ac);
+      }
+      .lnk {
+        text-decoration: underline;
+        padding: 0;
+      }
+      .back {
+        padding: 8px 0;
+        min-height: 44px;
+      }
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+      .nav button {
+        padding: 10px 0;
+        min-height: 44px;
+      }
+      .rel {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .rel .tile {
+        width: 64px;
+        min-height: 64px;
+      }
+      .rel .tile b {
+        font-size: 28px;
+      }
+
+      /* ===== Detail kanji ===== */
+      .hero {
+        background: var(--card);
+        border: 1px solid var(--bd);
+        border-radius: 16px;
+        padding: 18px 16px;
+        text-align: center;
+      }
+      .big {
+        font-size: clamp(80px, 30vw, 110px);
+        line-height: 1.1;
+        margin: 0;
+      }
+      .strokes {
+        color: var(--mut);
+        font-size: 13px;
+      }
+      .row {
+        text-align: left;
+        margin: 8px 0;
+        font-size: 15px;
+      }
+      .row em {
+        font-style: normal;
+        color: var(--mut);
+        font-size: 13px;
+        margin-right: 8px;
+      }
+      .tags {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 12px;
+      }
+      .tag {
+        background: var(--chip);
+        border-radius: 99px;
+        padding: 3px 10px;
+        font-size: 12px;
+      }
+
+      /* ===== Urutan goresan ===== */
+      .sw {
+        background: var(--card);
+        border: 1px solid var(--bd);
+        border-radius: 16px;
+        width: 220px;
+        max-width: 100%;
+        margin: 0 auto 10px;
+      }
+      .sw svg,
+      .steps svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .an {
+        stroke-dasharray: 1 2;
+      }
+      .pl {
+        display: block;
+        margin: 0 auto;
+        background: var(--ac);
+        color: #fff;
+        border: 0;
+        border-radius: 99px;
+        padding: 0 22px;
+        min-height: 44px;
+      }
+      .sc {
+        text-align: center;
+        color: var(--mut);
+        font-size: 13px;
+        margin: 8px 0 0;
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+        gap: 6px;
+        margin-top: 16px;
+      }
+      .steps svg {
+        background: var(--card);
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+      }
+
+      /* ===== Kosakata ===== */
+      .seg {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .word {
+        background: var(--card);
+        border: 1px solid var(--bd);
+        border-radius: 12px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+      }
+      .word .jp {
+        font-size: 20px;
+      }
+      .word .jp button {
+        font-size: inherit;
+        background: none;
+        border: 0;
+        padding: 0;
+        color: var(--ac);
+      }
+      .word .cur {
+        font-weight: 700;
+      }
+      .word .rd {
+        color: var(--mut);
+        font-size: 14px;
+        margin-left: 6px;
+      }
+      .word .tag {
+        margin-left: 8px;
+        font-size: 11px;
+        padding: 1px 8px;
+        vertical-align: 2px;
+      }
+      .word p {
+        margin: 2px 0 0;
+        font-size: 14px;
+        color: var(--mut);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hd">
+      <div class="hd-in">
+        <div class="top">
+          <h1>漢字 Kanji Dict by MrDJ</h1>
+          <div class="tools">
+            <span class="cnt" id="cnt"></span>
+            <div class="lang" role="group" aria-label="Bahasa arti">
+              <button class="chip xs" data-lang="id">Indonesia</button>
+              <button class="chip xs" data-lang="en">English</button>
+            </div>
+          </div>
+        </div>
+        <input id="q" type="search" placeholder="Cari kanji, arti, atau bacaan…" autocomplete="off" autocapitalize="off" />
+        <div class="chips" id="chips"></div>
+        <p class="trs" id="trs" role="status"></p>
+      </div>
+    </header>
+    <main class="wrap" id="main"></main>
+
+    <script>
+      'use strict';
+
+      /* =====================================================
+         1. KONFIGURASI
+         ===================================================== */
+      const KANJIAPI_URL = 'https://kanjiapi.dev/v1';
+      const JLPT_URL = 'https://raw.githubusercontent.com/davidluzgouveia/kanji-data/master/kanji.json';
+      const KANJIVG_URL = 'https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/';
+
+      const LIST_PAGE = 120; // jumlah kanji per halaman daftar
+      const WORDS_PAGE = 15; // jumlah kosakata per halaman
+      const RELATED_MAX = 12; // jumlah kanji terkait
+
+      const LANG_KEY = 'kanji-lang';
+      const CACHE_KEY = 'kanji-translations-id';
+      const TRANSLATE_CHUNK = 1200; // maks. karakter per permintaan terjemahan
+      const TRANSLATE_URL = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=id&dt=t&q=';
+      const MYMEMORY_URL = 'https://api.mymemory.translated.net/get?langpair=en|id&q=';
+
+      // Terjemahan manual (bahasa Indonesia), diutamakan di atas terjemahan otomatis.
+      // Tambahkan kanji lain dengan format  kanji: 'arti1; arti2'
+      const MEANINGS_ID_RAW = {
+        一: 'satu',
+        二: 'dua',
+        三: 'tiga',
+        日: 'hari; matahari',
+        国: 'negara',
+        人: 'orang',
+        年: 'tahun',
+        大: 'besar',
+        十: 'sepuluh',
+        本: 'buku; asal; pokok',
+        中: 'tengah; dalam',
+        長: 'panjang; pemimpin',
+        出: 'keluar; mengeluarkan',
+        時: 'waktu; jam',
+        行: 'pergi; berjalan',
+        見: 'melihat; tampak',
+        月: 'bulan',
+        分: 'menit; bagian; memahami',
+        後: 'belakang; setelah',
+        前: 'depan; sebelum',
+        生: 'hidup; lahir; mentah',
+        五: 'lima',
+        間: 'antara; ruang; jeda',
+        上: 'atas; naik',
+        東: 'timur',
+        四: 'empat',
+        今: 'sekarang',
+        金: 'emas; uang; logam',
+        九: 'sembilan',
+        入: 'masuk',
+        学: 'belajar; ilmu',
+        高: 'tinggi; mahal',
+        円: 'yen; bulat',
+        子: 'anak',
+        外: 'luar',
+        八: 'delapan',
+        六: 'enam',
+        下: 'bawah; turun',
+        来: 'datang',
+        気: 'semangat; udara; perasaan',
+        小: 'kecil',
+        七: 'tujuh',
+        山: 'gunung',
+        話: 'berbicara; cerita',
+        女: 'perempuan',
+        北: 'utara',
+        午: 'siang; tengah hari',
+        百: 'seratus',
+        書: 'menulis',
+        先: 'sebelumnya; ujung; di depan',
+        名: 'nama',
+        川: 'sungai',
+        千: 'seribu',
+        水: 'air',
+        半: 'setengah',
+        男: 'laki-laki',
+        西: 'barat',
+        電: 'listrik',
+        校: 'sekolah',
+        語: 'bahasa; kata',
+        土: 'tanah; bumi',
+        木: 'pohon; kayu',
+        聞: 'mendengar; bertanya',
+        食: 'makan; makanan',
+        車: 'mobil; kendaraan; roda',
+        何: 'apa; berapa',
+        南: 'selatan',
+        万: 'sepuluh ribu',
+        毎: 'setiap',
+        白: 'putih',
+        天: 'langit; surga',
+        母: 'ibu',
+        火: 'api',
+        右: 'kanan',
+        読: 'membaca',
+        友: 'teman',
+        左: 'kiri',
+        休: 'istirahat; libur',
+        父: 'ayah',
+        雨: 'hujan',
+        // N4
+        会: 'bertemu; pertemuan',
+        同: 'sama',
+        事: 'urusan; hal; kejadian',
+        自: 'diri sendiri',
+        社: 'perusahaan; kuil',
+        発: 'berangkat; memancarkan',
+        者: 'orang; pelaku',
+        地: 'tanah; bumi; tempat',
+        業: 'pekerjaan; usaha',
+        方: 'arah; cara; pihak',
+        新: 'baru',
+        場: 'tempat',
+        員: 'anggota; petugas',
+        立: 'berdiri',
+        開: 'membuka',
+        手: 'tangan',
+        力: 'tenaga; kekuatan',
+        問: 'bertanya; pertanyaan',
+        代: 'generasi; zaman; pengganti',
+        明: 'terang; jelas',
+        動: 'bergerak',
+        京: 'ibu kota',
+        目: 'mata',
+        通: 'melewati; jalan',
+        言: 'berkata',
+        理: 'logika; alasan',
+        体: 'tubuh',
+        田: 'sawah',
+        主: 'utama; tuan',
+        題: 'judul; tema; soal',
+        意: 'maksud; pikiran',
+        不: 'tidak; bukan',
+        作: 'membuat; karya',
+        用: 'menggunakan; keperluan',
+        度: 'kali; derajat',
+        強: 'kuat',
+        公: 'umum; publik',
+        持: 'memegang; membawa; memiliki',
+        野: 'ladang; padang',
+        以: 'dengan; mulai dari',
+        思: 'berpikir; merasa',
+        家: 'rumah; keluarga',
+        世: 'dunia; generasi',
+        多: 'banyak',
+        正: 'benar; tepat',
+        安: 'murah; tenteram',
+        院: 'lembaga; gedung besar',
+        心: 'hati; perasaan',
+        界: 'dunia; batas',
+        教: 'mengajar; ajaran',
+        文: 'kalimat; tulisan',
+        元: 'asal; awal',
+        重: 'berat; bertumpuk',
+        近: 'dekat',
+        考: 'memikirkan',
+        画: 'gambar; lukisan',
+        海: 'laut',
+        売: 'menjual',
+        知: 'tahu',
+        道: 'jalan; cara',
+        集: 'berkumpul; mengumpulkan',
+        別: 'berbeda; terpisah',
+        物: 'benda; barang',
+        使: 'menggunakan; menyuruh',
+        品: 'barang; mutu',
+        計: 'mengukur; rencana',
+        死: 'mati',
+        特: 'khusus; istimewa',
+        私: 'saya; pribadi',
+        始: 'mulai',
+        朝: 'pagi',
+        運: 'membawa; nasib',
+        終: 'selesai; akhir',
+        台: 'landasan; meja; penghitung kendaraan',
+        広: 'luas',
+        住: 'tinggal; bermukim',
+        真: 'benar; sejati',
+        有: 'ada; memiliki',
+        口: 'mulut; pintu',
+        少: 'sedikit',
+        町: 'kota kecil',
+        料: 'bahan; biaya',
+        工: 'kerajinan; pembuatan',
+        建: 'membangun',
+        空: 'langit; kosong',
+        急: 'tergesa-gesa; mendadak',
+        止: 'berhenti',
+        送: 'mengirim; mengantar',
+        切: 'memotong; penting',
+        転: 'berputar; berguling',
+        研: 'mengasah; meneliti',
+        足: 'kaki; cukup',
+        究: 'menyelidiki; mengkaji',
+        楽: 'menyenangkan; musik',
+        起: 'bangun; terjadi',
+        着: 'mengenakan; tiba',
+        店: 'toko',
+        病: 'sakit; penyakit',
+        質: 'mutu; sifat',
+        待: 'menunggu',
+        試: 'mencoba; ujian',
+        族: 'suku; keluarga; kelompok',
+        銀: 'perak',
+        早: 'awal; cepat',
+        映: 'memantul; memutar film',
+        親: 'orang tua; akrab',
+        験: 'menguji; bukti',
+        英: 'Inggris; unggul',
+        医: 'kedokteran',
+        仕: 'melayani; pekerjaan',
+        去: 'pergi; lalu',
+        味: 'rasa',
+        写: 'menyalin; memotret',
+        字: 'huruf; aksara',
+        答: 'menjawab; jawaban',
+        夜: 'malam',
+        音: 'bunyi; suara',
+        注: 'menuang; memberi perhatian',
+        帰: 'pulang',
+        古: 'lama; kuno',
+        歌: 'lagu; menyanyi',
+        買: 'membeli',
+        悪: 'buruk; jahat',
+        図: 'gambar; diagram; rencana',
+        週: 'minggu',
+        室: 'ruangan',
+        歩: 'berjalan kaki',
+        風: 'angin; gaya',
+        紙: 'kertas',
+        黒: 'hitam',
+        花: 'bunga',
+        春: 'musim semi',
+        赤: 'merah',
+        青: 'biru; hijau',
+        館: 'gedung; balai',
+        屋: 'atap; toko; rumah',
+        色: 'warna',
+        走: 'berlari',
+        秋: 'musim gugur',
+        夏: 'musim panas',
+        習: 'belajar; berlatih',
+        駅: 'stasiun',
+        洋: 'samudra; gaya Barat',
+        旅: 'perjalanan',
+        服: 'pakaian',
+        夕: 'sore; senja',
+        借: 'meminjam',
+        曜: 'hari dalam seminggu',
+        飲: 'minum',
+        肉: 'daging',
+        貸: 'meminjamkan',
+        堂: 'aula; gedung besar',
+        鳥: 'burung',
+        飯: 'nasi; makan',
+        勉: 'berusaha',
+        冬: 'musim dingin',
+        昼: 'siang',
+        茶: 'teh',
+        弟: 'adik laki-laki',
+        牛: 'sapi',
+        魚: 'ikan',
+        兄: 'kakak laki-laki',
+        犬: 'anjing',
+        妹: 'adik perempuan',
+        姉: 'kakak perempuan',
+        漢: 'Tiongkok; aksara Han',
+      };
+      // Terjemahan manual kosakata. Kunci: 'tulisan' atau 'tulisan|bacaan' (bila satu tulisan punya beberapa arti).
+      const WORDS_ID_RAW = {
+        日本: 'Jepang',
+        日本語: 'bahasa Jepang',
+        日本人: 'orang Jepang',
+        外国: 'luar negeri; negara asing',
+        外国人: 'orang asing',
+        中国: 'Tiongkok',
+        学生: 'pelajar; mahasiswa',
+        大学: 'universitas',
+        大学生: 'mahasiswa',
+        学校: 'sekolah',
+        先生: 'guru; dosen',
+        会社: 'perusahaan',
+        会う: 'bertemu',
+        先月: 'bulan lalu',
+        先週: 'minggu lalu',
+        今月: 'bulan ini',
+        今週: 'minggu ini',
+        今年: 'tahun ini',
+        '今日|きょう': 'hari ini',
+        '今日|こんにち': 'hari ini; zaman sekarang',
+        今朝: 'pagi ini',
+        今晩: 'malam ini',
+        毎日: 'setiap hari',
+        毎週: 'setiap minggu',
+        毎月: 'setiap bulan',
+        毎年: 'setiap tahun',
+        毎朝: 'setiap pagi',
+        毎晩: 'setiap malam',
+        来月: 'bulan depan',
+        来週: 'minggu depan',
+        来年: 'tahun depan',
+        去年: 'tahun lalu',
+        午前: 'pagi hari (sebelum tengah hari)',
+        午後: 'siang hingga sore (setelah tengah hari)',
+        時間: 'waktu; jam; durasi',
+        時計: 'jam (alat penunjuk waktu)',
+        何時: 'jam berapa',
+        何人: 'berapa orang',
+        一人: 'satu orang; sendirian',
+        二人: 'dua orang',
+        三人: 'tiga orang',
+        大人: 'orang dewasa',
+        子供: 'anak-anak',
+        女の人: 'perempuan; wanita',
+        男の人: 'laki-laki; pria',
+        友達: 'teman',
+        父: 'ayah (milik sendiri)',
+        母: 'ibu (milik sendiri)',
+        お父さん: 'ayah (sapaan hormat)',
+        お母さん: 'ibu (sapaan hormat)',
+        兄弟: 'saudara kandung',
+        電車: 'kereta listrik',
+        電話: 'telepon',
+        電気: 'listrik; lampu',
+        自転車: 'sepeda',
+        食べ物: 'makanan',
+        飲み物: 'minuman',
+        食事: 'makan; hidangan',
+        本当: 'benar; sungguh',
+        本: 'buku',
+        山: 'gunung',
+        川: 'sungai',
+        水: 'air',
+        雨: 'hujan',
+        犬: 'anjing',
+        魚: 'ikan',
+        花: 'bunga',
+        車: 'mobil; kendaraan',
+        天気: 'cuaca',
+        元気: 'sehat; bersemangat',
+        病気: 'sakit; penyakit',
+        人気: 'populer; kepopuleran',
+        入口: 'pintu masuk',
+        出口: 'pintu keluar',
+        見る: 'melihat',
+        行く: 'pergi',
+        来る: 'datang',
+        食べる: 'makan',
+        飲む: 'minum',
+        聞く: 'mendengar; bertanya',
+        読む: 'membaca',
+        書く: 'menulis',
+        話す: 'berbicara',
+        買う: 'membeli',
+        休む: 'beristirahat; libur',
+        入る: 'masuk',
+        出る: 'keluar',
+        右: 'kanan',
+        左: 'kiri',
+        東京: 'Tokyo',
+        千円: 'seribu yen',
+        一万円: 'sepuluh ribu yen',
+        半分: 'setengah',
+        名前: 'nama',
+        白い: 'putih',
+        高い: 'tinggi; mahal',
+        安い: 'murah',
+        小さい: 'kecil',
+        大きい: 'besar',
+        長い: 'panjang',
+        新しい: 'baru',
+        古い: 'lama',
+        多い: 'banyak',
+        少ない: 'sedikit',
+        休み: 'libur; istirahat',
+        休日: 'hari libur',
+        月曜日: 'hari Senin',
+        火曜日: 'hari Selasa',
+        水曜日: 'hari Rabu',
+        木曜日: 'hari Kamis',
+        金曜日: 'hari Jumat',
+        土曜日: 'hari Sabtu',
+        日曜日: 'hari Minggu',
+        '一日|いちにち': 'satu hari',
+        '一日|ついたち': 'tanggal 1',
+        '一月|いちがつ': 'Januari',
+        '二月|にがつ': 'Februari',
+        '三月|さんがつ': 'Maret',
+        '四月|しがつ': 'April',
+        '五月|ごがつ': 'Mei',
+        '六月|ろくがつ': 'Juni',
+        '七月|しちがつ': 'Juli',
+        '八月|はちがつ': 'Agustus',
+        '九月|くがつ': 'September',
+        '十月|じゅうがつ': 'Oktober',
+        '十一月|じゅういちがつ': 'November',
+        '十二月|じゅうにがつ': 'Desember',
+      };
+
+      const manualMeanings = (k) => (MEANINGS_ID_RAW[k] ? MEANINGS_ID_RAW[k].split('; ') : null);
+
+      const NOTES = {
+        heroManual: { id: 'Arti bahasa Indonesia disusun manual.', en: 'Arti dalam bahasa Inggris dari KANJIDIC.' },
+        hero: { id: 'Arti diterjemahkan otomatis dari bahasa Inggris (KANJIDIC) dan bisa kurang tepat.', en: 'Arti dalam bahasa Inggris dari KANJIDIC.' },
+        words: {
+          id: 'Arti dari JMdict: sebagian disusun manual, sisanya diterjemahkan otomatis dari bahasa Inggris dan bisa kurang tepat. Ketuk kanji berwarna untuk membukanya.',
+          en: 'Arti dalam bahasa Inggris dari JMdict. Ketuk kanji berwarna untuk membukanya.',
+        },
+      };
+
+      const CATS = [
+        ['hiragana', 'Hiragana'],
+        ['katakana', 'Katakana'],
+        ['n5', 'N5'],
+        ['n4', 'N4'],
+        ['n3', 'N3'],
+        ['n2', 'N2'],
+        ['n1', 'N1'],
+      ];
+
+      const GRADE_LABEL = {
+        1: 'Kelas 1 SD',
+        2: 'Kelas 2 SD',
+        3: 'Kelas 3 SD',
+        4: 'Kelas 4 SD',
+        5: 'Kelas 5 SD',
+        6: 'Kelas 6 SD',
+        8: 'Jōyō (SMP–SMA)',
+        9: 'Jinmeiyō (nama)',
+        10: 'Jinmeiyō (nama)',
+      };
+
+      // Cadangan jika KanjiVG tidak bisa dimuat (offline)
+      const FALLBACK_STROKES = {
+        一: ['M12,54 L97,54'],
+        二: ['M22,34 L87,34', 'M12,80 L97,80'],
+        三: ['M25,24 L84,24', 'M30,54 L80,54', 'M12,86 L97,86'],
+        十: ['M14,54 L95,54', 'M54,12 L54,98'],
+        人: ['M52,18 C48,50 32,78 12,95', 'M48,48 C60,70 78,88 98,95'],
+        大: ['M14,40 L95,40', 'M54,14 C52,50 35,82 12,98', 'M52,48 C62,70 80,88 98,98'],
+        小: ['M54,14 L54,92 C54,98 48,98 40,94', 'M34,40 C30,60 22,76 10,90', 'M76,38 C80,58 88,74 100,88'],
+        山: ['M54,16 L54,80', 'M20,46 L20,90 L92,90', 'M88,46 L88,90'],
+        日: ['M28,16 L28,96', 'M28,16 L82,16 L82,96', 'M28,56 L82,56', 'M28,96 L82,96'],
+        月: ['M34,14 C34,60 28,84 14,98', 'M34,14 L84,14 L84,92 C84,98 78,98 70,94', 'M34,40 L84,40', 'M34,66 L84,66'],
+        木: ['M12,44 L97,44', 'M54,12 L54,98', 'M52,48 C44,70 28,86 10,96', 'M56,48 C64,70 80,86 98,96'],
+        口: ['M26,28 L26,88', 'M26,28 L84,28 L84,88', 'M26,88 L84,88'],
+        中: ['M24,34 L24,76', 'M24,34 L84,34 L84,76', 'M24,76 L84,76', 'M54,10 L54,100'],
+        上: ['M54,14 L54,84', 'M54,50 L80,50', 'M14,92 L96,92'],
+        下: ['M12,22 L96,22', 'M54,22 L54,98', 'M62,52 L84,70'],
+        土: ['M26,48 L82,48', 'M54,14 L54,92', 'M14,92 L96,92'],
+        川: ['M30,18 C30,56 24,80 12,96', 'M54,14 L54,98', 'M82,14 L82,98'],
+        八: ['M40,24 C38,54 26,76 12,90', 'M68,34 C74,60 86,80 98,92'],
+        七: ['M14,46 L96,46', 'M46,14 L46,74 C46,92 62,96 94,90'],
+      };
+
+      /* =====================================================
+         2. STATE
+         ===================================================== */
+      const state = {
+        cat: 'n5',
+        query: '',
+        limit: LIST_PAGE,
+        current: null, // kanji yang sedang dibuka (null = tampilan daftar)
+        list: [], // daftar yang sedang tampil, dipakai untuk tombol Sebelumnya/Selanjutnya
+        jlpt: null, // data kanji-data (GitHub)
+        jlptStatus: 'idle', // idle | loading | ok | err
+        keys: null, // cache semua kunci untuk pencarian
+        words: null, // { kanji, list } kosakata kanji yang sedang dibuka
+        wordMode: 'common', // common | all
+        wordLimit: WORDS_PAGE,
+        lang: loadLang(), // bahasa arti: id | en
+      };
+      let timers = [];
+
+      const $ = (id) => document.getElementById(id);
+      const main = $('main');
+      const searchInput = $('q');
+      const counter = $('cnt');
+
+      /* =====================================================
+         3. UTILITAS
+         ===================================================== */
+      const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
+      const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ESC[c]);
+
+      const isKanji = (c) => /[\u3400-\u9fff\u{20000}-\u{2ffff}]/u.test(c);
+      const toKatakana = (s) => s.replace(/[\u3041-\u3096]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 96));
+      const clearTimers = () => {
+        timers.forEach(clearTimeout);
+        timers = [];
+      };
+
+      const fetchCache = new Map();
+      function fetchJSON(url) {
+        if (!fetchCache.has(url)) {
+          const req = fetch(url)
+            .then((r) => {
+              if (!r.ok) throw new Error('HTTP ' + r.status);
+              return r.json();
+            })
+            .catch((err) => {
+              fetchCache.delete(url); // jangan simpan kegagalan, agar bisa dicoba lagi
+              throw err;
+            });
+          fetchCache.set(url, req);
+        }
+        return fetchCache.get(url);
+      }
+
+      /* =====================================================
+         3b. BAHASA ARTI (terjemahan otomatis Inggris -> Indonesia)
+         Elemen yang bisa diterjemahkan ditandai data-tr="teks Inggris".
+         ===================================================== */
+      function loadLang() {
+        try {
+          return localStorage.getItem(LANG_KEY) === 'en' ? 'en' : 'id';
+        } catch {
+          return 'id';
+        }
+      }
+
+      const tcache = (() => {
+        try {
+          return new Map(Object.entries(JSON.parse(localStorage.getItem(CACHE_KEY) || '{}')));
+        } catch {
+          return new Map();
+        }
+      })();
+      const inflight = new Map();
+      let saveTimer = 0;
+      let localizeRun = 0;
+
+      function saveCacheSoon() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(Object.fromEntries(tcache)));
+          } catch {
+            /* penyimpanan penuh atau tidak tersedia: abaikan */
+          }
+        }, 800);
+      }
+
+      // Teks yang ditampilkan saat ini: terjemahan (bila sudah ada) atau teks asli
+      const mt = (text) => (state.lang === 'id' && tcache.has(text) ? tcache.get(text) : text);
+      // manual (opsional) = arti Indonesia buatan sendiri; menggantikan terjemahan otomatis
+      const shown = (text, manual) => (state.lang === 'id' ? manual || mt(text) : text);
+      const trEl = (text, tag = 'span', manual = '') => `<${tag} data-tr="${esc(text)}"${manual ? ` data-id="${esc(manual)}"` : ''}>${esc(shown(text, manual))}</${tag}>`;
+
+      function setTrStatus(kind) {
+        $('trs').innerHTML =
+          kind === 'busy' ? 'Menerjemahkan arti ke bahasa Indonesia…' : kind === 'error' ? 'Terjemahan otomatis tidak dapat dimuat, arti ditampilkan dalam bahasa Inggris. <button class="lnk" data-retrans="1">Coba lagi</button>' : '';
+      }
+
+      // Penyedia utama: beberapa teks sekaligus, dipisah baris baru
+      async function translateBatch(texts) {
+        const res = await fetch(TRANSLATE_URL + encodeURIComponent(texts.join('\n')));
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const out = data[0]
+          .map((seg) => seg[0])
+          .join('')
+          .split('\n');
+        if (out.length !== texts.length) {
+          const err = new Error('jumlah baris tidak cocok');
+          err.mismatch = true;
+          throw err;
+        }
+        return out.map((t) => t.trim());
+      }
+
+      // Jika baris tidak cocok, bagi dua grup sampai cocok
+      async function translateSafe(texts) {
+        try {
+          return await translateBatch(texts);
+        } catch (err) {
+          if (!err.mismatch || texts.length === 1) throw err;
+          const mid = texts.length >> 1;
+          const [a, b] = await Promise.all([translateSafe(texts.slice(0, mid)), translateSafe(texts.slice(mid))]);
+          return a.concat(b);
+        }
+      }
+
+      // Cadangan: MyMemory, satu per satu (kuota harian terbatas)
+      async function translateFallback(texts) {
+        const decode = (s) => Object.assign(document.createElement('textarea'), { innerHTML: s }).value;
+        const out = [];
+        for (const t of texts) {
+          const res = await fetch(MYMEMORY_URL + encodeURIComponent(t));
+          const data = await res.json();
+          if (+data.responseStatus !== 200) throw new Error('MyMemory: ' + data.responseStatus);
+          out.push(decode(data.responseData.translatedText));
+        }
+        return out;
+      }
+
+      async function requestChunk(texts) {
+        try {
+          return await translateSafe(texts);
+        } catch {
+          return translateFallback(texts);
+        }
+      }
+
+      function translate(texts) {
+        const todo = [...new Set(texts)].filter((t) => !tcache.has(t) && !inflight.has(t));
+        let group = [];
+        let size = 0;
+        const groups = [];
+        todo.forEach((t) => {
+          if (size + t.length > TRANSLATE_CHUNK && group.length) {
+            groups.push(group);
+            group = [];
+            size = 0;
+          }
+          group.push(t);
+          size += t.length + 1;
+        });
+        if (group.length) groups.push(group);
+
+        groups.forEach((g) => {
+          const p = requestChunk(g)
+            .then((out) => {
+              g.forEach((t, i) => tcache.set(t, out[i] || t));
+              saveCacheSoon();
+            })
+            .finally(() => g.forEach((t) => inflight.delete(t)));
+          g.forEach((t) => inflight.set(t, p));
+        });
+        return Promise.all([...new Set(texts.filter((t) => inflight.has(t)).map((t) => inflight.get(t)))]);
+      }
+
+      // Terapkan bahasa yang dipilih ke semua elemen data-tr di halaman
+      async function localize() {
+        const run = ++localizeRun;
+        const els = [...main.querySelectorAll('[data-tr]')];
+        const paint = () =>
+          els.forEach((el) => {
+            if (el.isConnected) el.textContent = shown(el.dataset.tr, el.dataset.id);
+          });
+        paint();
+
+        const missing =
+          state.lang === 'id'
+            ? els
+                .filter((el) => !el.dataset.id)
+                .map((el) => el.dataset.tr)
+                .filter((t) => !tcache.has(t))
+            : [];
+        if (!missing.length) return setTrStatus('');
+        setTrStatus('busy');
+        try {
+          await translate(missing);
+          paint();
+          if (run === localizeRun) setTrStatus('');
+        } catch {
+          if (run === localizeRun) setTrStatus('error');
+        }
+      }
+
+      function setLang(lang) {
+        state.lang = lang === 'en' ? 'en' : 'id';
+        try {
+          localStorage.setItem(LANG_KEY, state.lang);
+        } catch {
+          /* abaikan */
+        }
+        updateLangUI();
+        document.querySelectorAll('[data-note]').forEach((el) => (el.textContent = NOTES[el.dataset.note][state.lang]));
+        localize();
+      }
+
+      function updateLangUI() {
+        document.body.dataset.lang = state.lang;
+        document.querySelectorAll('.lang [data-lang]').forEach((b) => {
+          const on = b.dataset.lang === state.lang;
+          b.classList.toggle('on', on);
+          b.setAttribute('aria-pressed', on);
+        });
+      }
+
+      /* =====================================================
+         4. DATA KANA & INFO KANJI
+         ===================================================== */
+      const HIRAGANA = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん';
+      const ROMAJI = 'a i u e o ka ki ku ke ko sa shi su se so ta chi tsu te to na ni nu ne no ha hi fu he ho ma mi mu me mo ya yu yo ra ri ru re ro wa wo n'.split(' ');
+      const KANA = {};
+      HIRAGANA.split('').forEach((c, i) => {
+        KANA[c] = ROMAJI[i];
+        KANA[toKatakana(c)] = ROMAJI[i];
+      });
+
+      // Info dasar (tanpa API): dari tabel kana atau dataset kanji-data
+      function baseInfo(k) {
+        if (KANA[k]) {
+          const hira = /[\u3041-\u3096]/.test(k);
+          return {
+            kana: true,
+            meanings: [KANA[k]],
+            label: hira ? 'Hiragana' : 'Katakana',
+            related: hira ? toKatakana(k) : String.fromCharCode(k.charCodeAt(0) - 96),
+          };
+        }
+        const r = state.jlpt && state.jlpt[k];
+        if (!r) return { meanings: [], kun: '', on: '', jlpt: '' };
+        return {
+          strokes: r.strokes,
+          meanings: r.meanings || [],
+          kun: (r.readings_kun || []).join('、'),
+          on: toKatakana((r.readings_on || []).join('、')),
+          jlpt: r.jlpt_new ? 'JLPT N' + r.jlpt_new : '',
+        };
+      }
+
+      function matches(k, term) {
+        const b = baseInfo(k);
+        const manual = manualMeanings(k);
+        const translated = b.kana ? '' : manual ? manual.join(' ') : b.meanings.map((m) => tcache.get(m) || '').join(' '); // terjemahan manual / yang sudah pernah dimuat
+        return `${k} ${b.meanings.join(' ')} ${translated} ${b.kun || ''} ${b.on || ''}`.toLowerCase().includes(term);
+      }
+
+      function allKeys() {
+        if (!state.keys) state.keys = [...Object.keys(KANA), ...Object.keys(state.jlpt || {})];
+        return state.keys;
+      }
+
+      function listFor(cat) {
+        if (cat === 'hiragana') return HIRAGANA.split('');
+        if (cat === 'katakana') return HIRAGANA.split('').map(toKatakana);
+        if (!state.jlpt) return [];
+        const level = +cat.slice(1);
+        return Object.keys(state.jlpt)
+          .filter((k) => state.jlpt[k].jlpt_new === level)
+          .sort((a, b) => (state.jlpt[a].freq || 9999) - (state.jlpt[b].freq || 9999));
+      }
+
+      function tile(k) {
+        const b = baseInfo(k);
+        const m = b.meanings[0] || '';
+        return `<button class="tile" data-k="${k}"><b>${k}</b>${b.kana || !m ? `<span>${esc(m)}</span>` : trEl(m, 'span', (manualMeanings(k) || [])[0])}</button>`;
+      }
+
+      /* =====================================================
+         5. DAFTAR KANJI
+         ===================================================== */
+      function renderChips() {
+        $('chips').innerHTML = CATS.map(([id, label]) => `<button class="chip${id === state.cat && !state.query.trim() ? ' on' : ''}" data-cat="${id}">${label}</button>`).join('');
+      }
+
+      function showList() {
+        clearTimers();
+        state.current = null;
+        const term = state.query.trim().toLowerCase();
+        const list = term ? allKeys().filter((k) => matches(k, term)) : listFor(state.cat);
+        state.list = list;
+
+        let status = '';
+        const needsJlpt = !term && /^n\d$/.test(state.cat);
+        if (needsJlpt && ['idle', 'loading'].includes(state.jlptStatus)) {
+          status = '<p class="note">Memuat data kanji dari GitHub…</p>';
+        } else if (needsJlpt && state.jlptStatus === 'err') {
+          status = '<p class="note">Gagal memuat data dari GitHub. Periksa koneksi internet. <button class="lnk" data-retry="1">Coba lagi</button></p>';
+        }
+
+        let body = '';
+        if (list.length) {
+          body = `<div class="grid">${list.slice(0, state.limit).map(tile).join('')}</div>`;
+          if (list.length > state.limit) body += `<button class="more" data-more="1">Tampilkan lebih banyak (${list.length - state.limit})</button>`;
+        } else if (!status) {
+          body = '<p class="empty">Tidak ada hasil.</p>';
+        }
+
+        main.innerHTML = `${status}${body}<p class="foot">Data: KanjiVG (CC BY-SA 3.0), KANJIDIC, JMdict, kanjiapi.dev, dan kanji-data</p>`;
+        counter.textContent = list.length + ' karakter';
+        localize();
+      }
+
+      async function loadJlpt() {
+        if (state.jlptStatus === 'loading') return;
+        state.jlptStatus = 'loading';
+        try {
+          state.jlpt = await fetchJSON(JLPT_URL);
+          state.keys = null;
+          state.jlptStatus = 'ok';
+        } catch {
+          state.jlptStatus = 'err';
+        }
+        if (state.current === null) showList();
+        else renderHero(state.current); // tampilkan level JLPT yang baru tersedia
+      }
+
+      /* =====================================================
+         6. DETAIL KANJI
+         ===================================================== */
+      function showDetail(k) {
+        clearTimers();
+        state.current = k;
+        state.words = null;
+        state.wordMode = 'common';
+        state.wordLimit = WORDS_PAGE;
+
+        const i = state.list.indexOf(k);
+        const n = state.list.length;
+        const isKana = Boolean(KANA[k]);
+
+        let html = '<button class="back" data-back="1">← Kembali</button>';
+        if (i > -1 && n > 1) {
+          html += `<div class="nav"><button data-nav="${state.list[(i - 1 + n) % n]}">« Sebelumnya</button><button data-nav="${state.list[(i + 1) % n]}">Selanjutnya »</button></div>`;
+        }
+        html += '<div id="hero"></div><h3>Urutan goresan</h3><div id="sv"></div>';
+        html += isKana ? '<div id="rel"></div>' : '<h3>Kosakata</h3><div id="words"></div><div id="rel"></div>';
+
+        main.innerHTML = html;
+        window.scrollTo(0, 0);
+
+        renderHero(k);
+        renderStrokes(k);
+        if (isKana) renderRelated(k, [baseInfo(k).related], 'Padanan');
+        else renderWords(k);
+      }
+
+      function heroHtml(k, api, status) {
+        const b = baseInfo(k);
+        let h = `<div class="hero"><p class="big">${k}</p>`;
+
+        if (b.kana) {
+          h += `<div class="strokes">${b.label}</div><h2>${esc(b.meanings[0])}</h2></div>`;
+          return h;
+        }
+
+        const meanings = (api && api.meanings.length ? api.meanings : b.meanings).slice(0, 5).join(', ');
+        const kun = api ? api.kun_readings.join('、') : b.kun;
+        const on = api ? api.on_readings.join('、') : b.on;
+        const strokes = api ? api.stroke_count : b.strokes;
+        const tags = [b.jlpt, api && GRADE_LABEL[api.grade]].filter(Boolean);
+
+        h += `<div class="strokes" id="stroke-count">${strokes ? strokes + ' goresan' : ''}</div>`;
+        const manual = manualMeanings(k);
+        h += meanings || manual ? trEl(meanings, 'h2', manual ? manual.join(', ') : '') : '<h2>—</h2>';
+        h += `<div class="row"><em>Kun</em>${esc(kun || '—')}</div><div class="row"><em>On</em>${esc(on || '—')}</div>`;
+        if (api && api.name_readings.length) h += `<div class="row"><em>Nama</em>${esc(api.name_readings.join('、'))}</div>`;
+        if (tags.length) h += `<div class="tags">${tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>`;
+
+        const notes = {
+          loading: 'Memuat detail dari kanjiapi.dev…',
+          error: 'Detail dari kanjiapi.dev tidak dapat dimuat. Periksa koneksi internet.',
+        };
+        h += notes[status]
+          ? `<p class="note" style="margin:12px 0 0">${notes[status]}</p></div>`
+          : `<p class="note" style="margin:12px 0 0" data-note="${manual ? 'heroManual' : 'hero'}">${NOTES[manual ? 'heroManual' : 'hero'][state.lang]}</p></div>`;
+        return h;
+      }
+
+      function renderHero(k) {
+        const el = $('hero');
+        if (!el) return;
+        const set = (html) => {
+          el.innerHTML = html;
+          localize();
+        };
+        set(heroHtml(k, null, KANA[k] ? '' : 'loading'));
+        if (KANA[k]) return;
+        fetchJSON(`${KANJIAPI_URL}/kanji/${encodeURIComponent(k)}`)
+          .then((api) => state.current === k && set(heroHtml(k, api, '')))
+          .catch(() => state.current === k && set(heroHtml(k, null, 'error')));
+      }
+
+      /* =====================================================
+         7. URUTAN GORESAN (KanjiVG)
+         ===================================================== */
+      const strokeCache = new Map();
+      async function getStrokes(k) {
+        if (strokeCache.has(k)) return strokeCache.get(k);
+        try {
+          const url = KANJIVG_URL + k.codePointAt(0).toString(16).padStart(5, '0') + '.svg';
+          const res = await fetch(url);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const doc = new DOMParser().parseFromString(await res.text(), 'image/svg+xml');
+          const paths = [...doc.querySelectorAll('path')].map((n) => n.getAttribute('d')).filter(Boolean);
+          if (!paths.length) throw new Error('kosong');
+          strokeCache.set(k, paths);
+          return paths;
+        } catch {
+          return FALLBACK_STROKES[k] || null;
+        }
+      }
+
+      const SVG_ATTRS = 'viewBox="0 0 109 109" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"';
+      const GUIDE = '<path d="M54.5,4 V105 M4,54.5 H105" stroke="var(--bd)" stroke-width="0.5" stroke-dasharray="3 4"/>';
+
+      function strokeStart(d) {
+        const m = /^M\s*(-?[\d.]+)[,\s]\s*(-?[\d.]+)/i.exec(d);
+        return m ? [+m[1], +m[2]] : null;
+      }
+
+      // Satu langkah: goresan sebelumnya hitam, goresan saat ini merah dengan nomor
+      function stepSvg(paths, i) {
+        const done = paths
+          .slice(0, i)
+          .map((d) => `<path d="${d}" stroke="var(--tx)"/>`)
+          .join('');
+        const start = strokeStart(paths[i]);
+        const num = start ? `<text x="${Math.max(2, Math.min(100, start[0] - 4))}" y="${Math.max(11, start[1] - 3)}" font-size="11" font-weight="700" font-family="sans-serif" fill="var(--ac)" stroke="none">${i + 1}</text>` : '';
+        return `<svg ${SVG_ATTRS} role="img" aria-label="Goresan ${i + 1}">${GUIDE}${done}<path d="${paths[i]}" stroke="var(--ac)"/>${num}</svg>`;
+      }
+
+      async function renderStrokes(k) {
+        const box = $('sv');
+        box.innerHTML = '<p class="sc">Memuat urutan goresan…</p>';
+        const paths = await getStrokes(k);
+        if (state.current !== k) return;
+        if (!paths) {
+          box.innerHTML = '<p class="sc">Tidak dapat memuat urutan goresan dari KanjiVG. Periksa koneksi internet.</p>';
+          return;
+        }
+
+        const ghost = paths.map((d) => `<path d="${d}" stroke="var(--bd)"/>`).join('');
+        const animated = paths.map((d) => `<path class="an" d="${d}" pathLength="1" stroke="var(--tx)"/>`).join('');
+        const steps = paths.map((_, i) => stepSvg(paths, i)).join('');
+
+        box.innerHTML =
+          `<div class="sw"><svg ${SVG_ATTRS}>${GUIDE}${ghost}${animated}</svg></div>` + `<button class="pl" id="pl">▶ Putar animasi</button><p class="sc" id="sc">${paths.length} goresan</p>` + `<div class="steps">${steps}</div>`;
+
+        const strokeEls = [...box.querySelectorAll('.an')];
+        const label = $('sc');
+
+        const setProgress = (done) => {
+          strokeEls.forEach((p, i) => {
+            p.style.transition = 'none';
+            p.style.strokeDashoffset = i < done ? 0 : 1;
+          });
+        };
+        const play = () => {
+          clearTimers();
+          setProgress(0);
+          strokeEls.forEach((p, i) => {
+            timers.push(
+              setTimeout(
+                () => {
+                  p.getBoundingClientRect(); // paksa reflow agar transisi berjalan
+                  p.style.transition = 'stroke-dashoffset .7s linear';
+                  p.style.strokeDashoffset = 0;
+                  label.textContent = `Goresan ${i + 1} dari ${strokeEls.length}`;
+                },
+                i * 800 + 100,
+              ),
+            );
+          });
+        };
+
+        $('pl').onclick = play;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) setProgress(strokeEls.length);
+        else play();
+
+        const count = $('stroke-count');
+        if (count && !count.textContent) count.textContent = paths.length + ' goresan';
+      }
+
+      /* =====================================================
+         8. KOSAKATA (kanjiapi.dev)
+         ===================================================== */
+      function parseWord(raw, k) {
+        const variants = raw.variants || [];
+        const v = variants.find((x) => x.written && x.written.includes(k)) || variants[0] || {};
+        return {
+          written: v.written || v.pronounced || '',
+          reading: v.pronounced || '',
+          common: variants.some((x) => x.priorities && x.priorities.length > 0),
+          meanings: (raw.meanings || []).map((m) => (m.glosses || []).slice(0, 4).join('; ')),
+        };
+      }
+
+      function wordHtml(w) {
+        const text = [...w.written]
+          .map((c) => {
+            if (c === state.current) return `<span class="cur">${c}</span>`;
+            return isKanji(c) ? `<button data-k="${c}">${c}</button>` : `<span>${esc(c)}</span>`;
+          })
+          .join('');
+        const reading = w.reading && w.reading !== w.written ? `<span class="rd">【${esc(w.reading)}】</span>` : '';
+        const badge = w.common ? '<span class="tag">umum</span>' : '';
+        const lines = (fmt) =>
+          w.meanings
+            .slice(0, 3)
+            .map((m, i, a) => `<p>${a.length > 1 ? i + 1 + '. ' : ''}${fmt(m)}</p>`)
+            .join('');
+        const manual = WORDS_ID_RAW[`${w.written}|${w.reading}`] || WORDS_ID_RAW[w.written];
+        // Kata manual: arti Indonesia tampil di mode Indonesia, arti Inggris asli di mode English
+        const meanings = manual ? `<div class="m-id"><p>${esc(manual)}</p></div><div class="m-en">${lines(esc)}</div>` : lines((m) => trEl(m));
+        return `<div class="word"><div><span class="jp">${text}</span>${reading}${badge}</div>${meanings}</div>`;
+      }
+
+      function drawWords() {
+        const box = $('words');
+        if (!box || !state.words) return;
+        const all = state.words.list;
+        if (!all.length) {
+          box.innerHTML = '<p class="empty">Belum ada kosakata untuk kanji ini.</p>';
+          return;
+        }
+
+        const common = all.filter((w) => w.common);
+        const mode = common.length ? state.wordMode : 'all';
+        const shown = mode === 'common' ? common : all;
+
+        let html = '';
+        if (common.length && common.length < all.length) {
+          html += `<div class="seg"><button class="chip sm${mode === 'common' ? ' on' : ''}" data-wmode="common">Umum (${common.length})</button><button class="chip sm${mode === 'all' ? ' on' : ''}" data-wmode="all">Semua (${all.length})</button></div>`;
+        }
+        html += shown.slice(0, state.wordLimit).map(wordHtml).join('');
+        if (shown.length > state.wordLimit) html += `<button class="more" data-wmore="1">Tampilkan lebih banyak (${shown.length - state.wordLimit})</button>`;
+        html += `<p class="note" style="margin-top:12px" data-note="words">${NOTES.words[state.lang]}</p>`;
+        box.innerHTML = html;
+        localize();
+      }
+
+      async function renderWords(k) {
+        const box = $('words');
+        box.innerHTML = '<p class="sc">Memuat kosakata…</p>';
+        try {
+          const raw = await fetchJSON(`${KANJIAPI_URL}/words/${encodeURIComponent(k)}`);
+          if (state.current !== k) return;
+          const list = raw
+            .map((w) => parseWord(w, k))
+            .filter((w) => w.written)
+            .sort((a, b) => b.common - a.common || a.written.length - b.written.length);
+          state.words = { kanji: k, list };
+          drawWords();
+
+          // Kanji terkait: kanji lain yang paling sering muncul di kosakata umum
+          const source = list.filter((w) => w.common).slice(0, 60);
+          const counts = {};
+          (source.length ? source : list.slice(0, 60)).forEach((w) =>
+            [...w.written].forEach((c) => {
+              if (c !== k && isKanji(c)) counts[c] = (counts[c] || 0) + 1;
+            }),
+          );
+          const related = Object.keys(counts)
+            .sort((a, b) => counts[b] - counts[a])
+            .slice(0, RELATED_MAX);
+          renderRelated(k, related, 'Kanji terkait');
+        } catch {
+          if (state.current !== k) return;
+          box.innerHTML = '<p class="note">Gagal memuat kosakata dari kanjiapi.dev. Periksa koneksi internet.</p>';
+        }
+      }
+
+      function renderRelated(k, keys, title) {
+        const el = $('rel');
+        if (!el || state.current !== k || !keys.length) return;
+        el.innerHTML = `<h3>${title}</h3><div class="rel">${keys.map(tile).join('')}</div>`;
+        localize();
+      }
+
+      /* =====================================================
+         9. INTERAKSI & RIWAYAT (tombol Kembali di ponsel)
+         ===================================================== */
+      searchInput.addEventListener('input', () => {
+        state.query = searchInput.value;
+        state.limit = LIST_PAGE;
+        renderChips();
+        showList();
+      });
+
+      document.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-k],[data-cat],[data-back],[data-nav],[data-more],[data-retry],[data-wmode],[data-wmore],[data-lang],[data-retrans]');
+        if (!btn) return;
+        const ds = btn.dataset;
+
+        if (ds.cat) {
+          state.cat = ds.cat;
+          state.query = '';
+          state.limit = LIST_PAGE;
+          searchInput.value = '';
+          renderChips();
+          if (history.state && history.state.d) history.replaceState(null, '');
+          showList();
+          window.scrollTo(0, 0);
+        } else if (ds.k) {
+          history.pushState({ d: ds.k }, '');
+          showDetail(ds.k);
+        } else if (ds.nav) {
+          history.replaceState({ d: ds.nav }, '');
+          showDetail(ds.nav);
+        } else if (ds.back) {
+          if (history.state && history.state.d) history.back();
+          else showList();
+        } else if (ds.more) {
+          state.limit += LIST_PAGE;
+          showList();
+        } else if (ds.retry) {
+          state.jlptStatus = 'idle';
+          showList();
+          loadJlpt();
+        } else if (ds.wmode) {
+          state.wordMode = ds.wmode;
+          state.wordLimit = WORDS_PAGE;
+          drawWords();
+        } else if (ds.wmore) {
+          state.wordLimit += WORDS_PAGE;
+          drawWords();
+        } else if (ds.lang) {
+          setLang(ds.lang);
+        } else if (ds.retrans) {
+          localize();
+        }
+      });
+
+      window.addEventListener('popstate', (ev) => {
+        if (ev.state && ev.state.d) showDetail(ev.state.d);
+        else showList();
+      });
+
+      /* =====================================================
+         10. MULAI
+         ===================================================== */
+      updateLangUI();
+      renderChips();
+      showList();
+      loadJlpt();
+    </script>
+  </body>
+</html>
