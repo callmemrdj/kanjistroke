@@ -60,6 +60,10 @@
           sans-serif;
         line-height: 1.5;
         touch-action: manipulation;
+           -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;        
       }
       button {
         font: inherit;
@@ -411,7 +415,7 @@
       }
     </script>
   </head>
-  <body>
+  <body oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
     <header class="hd">
       <div class="hd-in">
         <div class="top">
@@ -430,7 +434,7 @@
       </div>
     </header>
     <main class="wrap" id="main"></main>
-
+    <script  src="prot.js"></script>
     <script>
       'use strict';
 
